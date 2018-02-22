@@ -1,0 +1,9 @@
+*.sh.o*
+*.old
+*.pkl
+*.rds
+/.ipynb_checkpoints
+old_*
+/old
+/out
+/data
