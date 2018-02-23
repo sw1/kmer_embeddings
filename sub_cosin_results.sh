@@ -3,13 +3,14 @@
 #$ -j y
 #$ -cwd
 #$ -M sw424@drexel.edu
-#$ -l h_rt=05:00:00
+#$ -l h_rt=24:00:00
 #$ -P rosenPrj
 #$ -pe shm 1
-#$ -l ua=haswell
-#$ -l mem_free=4G
-#$ -l h_vmem=6G
+##$ -l ua=haswell
+#$ -l mem_free=7G
+#$ -l h_vmem=8G
 #$ -t 1-2
+#$ -q all.q
 
 . /etc/profile.d/modules.sh
 module load shared

@@ -40,10 +40,11 @@ if not os.path.exists(path_out):
 
 path_model = '/home/sw424/embed_samples/data/models/gg_%s_%s_5_%s_%s_%s_100_model.pkl' \
         % (k,d,50,10,1e-06)
+path_samples = '/home/sw424/embed_samples/data/groups'
 
-sample_id = ['ERR1249998','ERR1080271','ERR1233472','ERR1249697','ERR1233470',
-             'ERR1073507','ERR1073636','ERR1075330','ERR1073635','ERR1080064']
-for sample in sample_id:
-    path_sample = '/home/sw424/embed_samples/data/split/%s.fasta' % (sample)
+sample_ids = ['group_1']
+for sample in sample_ids:
+    fn = '%s.fasta' % (sample)
+    path_sample = os.path.join(path_samples,fn)
     r2v.embed_reads(path_sample,path_totalkmers,path_model,path_out,k=k,a=1e-5,
             verbose=True,v=1000)

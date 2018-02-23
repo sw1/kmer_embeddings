@@ -27,5 +27,5 @@ cat(sprintf('Classifying taxa for %s.\n',sample))
 seqs <- as.character(readDNAStringSet(fna))
 tax <- data.frame(unname(assignTaxonomy(seqs,trainset,verbose=TRUE)),stringsAsFactors=FALSE)
 
-write_csv(tax,sprintf('%s/%s_tax.csv.gz',wd,sample))
+write_csv(tax,sprintf('%s/%s_tax.csv.gz',remb_path,sample))
 
