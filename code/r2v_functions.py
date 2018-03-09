@@ -11,7 +11,6 @@ import six.moves.cPickle
 import collections
 from shutil import copyfile
 
-import h5py
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -45,7 +44,7 @@ def generate_kmers(line,k,alphabet={'A':'A','C':'C','G':'G','T':'T'}):
             yield kmer
 
 def embed_reads(path_sample,path_totalkmers,path_model,path_out,k=None,a=1e-5,n_components=1,
-        verbose=True,v=1000):
+        delim=None,svm=True,verbose=True,v=1000):
     
     sample_id = os.path.basename(os.path.normpath(path_sample)).split('.')[0]
 
@@ -66,11 +65,18 @@ def embed_reads(path_sample,path_totalkmers,path_model,path_out,k=None,a=1e-5,n_
     file = open(path_sample,'r')
 
     i = 0
+    read_ids = []
     reads = np.zeros((d,total_reads),dtype='float64')
     for line in file:
-        
         if line[0] == '>':
-            continue
+            if delim is None:
+                read_id = line[1:-1]
+            else:
+                read_id = line[1:line.find(delim)]
+            read_ids.append(read_id)
+            if verbose:
+                if i % v == 0:
+                    print('Processing %s: %s/%s.' % (read_id,i,total_reads))
         else:
             r = np.zeros(d,dtype='float64')
             n_kmer = 0
@@ -80,25 +86,23 @@ def embed_reads(path_sample,path_totalkmers,path_model,path_out,k=None,a=1e-5,n_
                     r += model[kmer] * a/(a + total_kmers[kmer])
                     n_kmer += 1
             reads[:,i] = r/n_kmer
+            i += 1
 
+    if svm:
         if verbose:
-            if i % v == 0:
-                print('Processing read: %s/%s.' % (i,total_reads))
-
-        i += 1
-
-    if verbose:
-        print('Performing SVD: (%s,%s).' % (d,total_reads))
-    svd = TruncatedSVD(n_components=n_components, n_iter=7, random_state=0)
-    svd.fit(reads)
-    pc = svd.components_
-    reads -= reads.dot(pc.T) * pc
+            print('Performing SVD: (%s,%s).' % (d,total_reads))
+        svd = TruncatedSVD(n_components=n_components, n_iter=7, random_state=0)
+        svd.fit(reads)
+        pc = svd.components_
+        reads -= reads.dot(pc.T) * pc
+    reads = reads.T
 
     fn_sample = '%s_remb.csv.gz' % (sample_id)
     path_out = os.path.join(path_out,fn_sample)
     if verbose:
         print('Saving reads to %s.' % (path_out))
-    pd.DataFrame(reads).to_csv(path_out,compression='gzip')
+    reads = pd.DataFrame(reads,index=read_ids)
+    reads.to_csv(path_out,compression='gzip')
 
 def plot_embeddings(embedding, ids, taxa, taxon_level = 'genus', taxon_parent_rank = 0,
                     n = 8, min_taxa = 10, n_iter = 1000, p = None, seed = None,

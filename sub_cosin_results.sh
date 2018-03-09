@@ -10,7 +10,6 @@
 #$ -l mem_free=7G
 #$ -l h_vmem=8G
 #$ -t 1-2
-#$ -q all.q
 
 . /etc/profile.d/modules.sh
 module load shared
@@ -18,12 +17,20 @@ module load proteus
 module load sge/univa
 module load gcc/4.8.1
 module load samtools/1.3.1
+module load R/mro/3.3.3
 
 USERNAME=sw424
 DATA=/home/$USERNAME/embed_samples
 
-script=$DATA/code/cosin_reads_results.R
+script_reads=$DATA/code/cosin_reads_results.R
+script_kmers=$DATA/code/cosin_kmers_results.R
 
-$script $SGE_TASK_ID
+if [[ $SGE_TASK_ID == 1 ]]; then
+    $script_reads
+fi
+
+if [[ $SGE_TASK_ID == 2 ]]; then
+    $script_kmers
+fi
 
 exit 0

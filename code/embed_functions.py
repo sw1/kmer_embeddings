@@ -4,11 +4,10 @@ def open_file_method(path):
     ext = splitext(path)[1]
     if (ext == '.gz'):
         def open_file(path):
-            return gzip.open(path)
+            return gzip.open(path), True
     else:
         def open_file(path):
-            return open(path,'r')
-    return open_file
+            return open(path,'r'), False
 
 def generate_kmers(k,nts='ACGT'):
     dictionary = {''.join(x):-1 for x in product(nts, repeat=k)}

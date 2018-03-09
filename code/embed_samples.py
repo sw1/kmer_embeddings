@@ -23,7 +23,7 @@ k = 10
 d = 256
 a = 1e-05
 
-out_path = '/home/sw424/embed_samples/out'
+out_path = '/home/sw424/embed_samples/out/ag_samples_embeddings'
 
 print('Loading sample kmers.')
 sample_profile = six.moves.cPickle.load(open(os.path.join(out_path,'merged_subsets.pkl'),'rb'))
@@ -36,10 +36,12 @@ print('Loading model.')
 path_model = '/home/sw424/embed_samples/data/models/gg_%s_%s_5_%s_%s_%s_100_model.pkl' % (k,d,50,10,1e-06)
 model = Word2Vec.load(path_model).wv
 
+sample_ids = []
 sample_idx = {sample:i for i,sample in enumerate(samples)}
 embeddings = np.zeros((d,len(sample_idx)),dtype='float64')
 for i,sample in enumerate(samples):
     print('%.4i: Embedding sample %s.' % (i,sample))
+    sample_ids.append(sample)
     sample_kmers = samples[sample]
     n_kmers = 0
     embedding = np.zeros(d,dtype='float64')
@@ -56,14 +58,14 @@ svd.fit(embeddings)
 pc = svd.components_
 
 print('Saving embedding matrix and sample indexes.')
-df_samples = pd.DataFrame.from_dict(sample_idx,orient='index')
-df_samples.to_csv(os.path.join(out_path,'sample_ids.csv.gz'),compression='gzip')
+#df_samples = pd.DataFrame.from_dict(sample_idx,orient='index')
+#df_samples.to_csv(os.path.join(out_path,'sample_ids.csv.gz'),compression='gzip')
 
-df_embeddings = pd.DataFrame(embeddings)
+df_embeddings = pd.DataFrame(embeddings.T,index=sample_ids)
 df_embeddings.to_csv(os.path.join(out_path,'sample_embeddings_raw.csv.gz'),compression='gzip')
 
 embeddings -= embeddings.dot(pc.T) * pc
 
-df_embeddings = pd.DataFrame(embeddings)
+df_embeddings = pd.DataFrame(embeddings.T,index=sample_ids)
 df_embeddings.to_csv(os.path.join(out_path,'sample_embeddings.csv.gz'),compression='gzip')
 
